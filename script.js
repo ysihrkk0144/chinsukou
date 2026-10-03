@@ -34,7 +34,13 @@ const symbolHeight = 50;
   さらに速くしたい場合は
   480～520程度に変更。
 */
-const baseSpeed = 430;
+const reelSpeeds = [
+  520, // 1列目
+  680, // 2列目
+  590, // 3列目
+  760, // 4列目
+  640  // 5列目
+];
 
 
 /*
@@ -138,9 +144,8 @@ reels.forEach(
       `translateY(${initialPosition}px)`;
 
 
-    const speed =
-      baseSpeed +
-      reelNumber * 17;
+const speed =
+  reelSpeeds[reelNumber];
 
 
     reelStates.push({

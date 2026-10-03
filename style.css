@@ -90,8 +90,10 @@ h1 {
   background:
     linear-gradient(
       to bottom,
-      rgba(210, 210, 210, 0.90),
-      rgba(235, 235, 235, 0.55)
+      #000 0%,
+      #000 50%,
+      rgba(220, 220, 220, 0.85) 50%,
+      rgba(235, 235, 235, 0.55) 100%
     );
 
   border-bottom:
@@ -105,9 +107,11 @@ h1 {
 
   background:
     linear-gradient(
-      to top,
-      rgba(210, 210, 210, 0.90),
-      rgba(235, 235, 235, 0.55)
+      to bottom,
+      rgba(235, 235, 235, 0.55) 0%,
+      rgba(220, 220, 220, 0.85) 50%,
+      #000 50%,
+      #000 100%
     );
 
   border-top:
