@@ -62,7 +62,11 @@ h1 {
   perspective: 300px;
 }
 
-/* 中央ライン */
+
+/* =========================
+   中央の表示領域
+========================= */
+
 .reel-window::before,
 .reel-window::after {
   content: "";
@@ -71,41 +75,49 @@ h1 {
   left: 0;
 
   width: 100%;
-  height: 1px;
-
-  background: rgba(0, 0, 0, 0.2);
+  height: 50px;
 
   z-index: 10;
 
   pointer-events: none;
 }
 
+
+/* 上段 */
 .reel-window::before {
-  top: 50px;
+  top: 0;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(210, 210, 210, 0.90),
+      rgba(235, 235, 235, 0.55)
+    );
+
+  border-bottom:
+    1px solid rgba(0, 0, 0, 0.15);
 }
 
+
+/* 下段 */
 .reel-window::after {
-  bottom: 50px;
+  bottom: 0;
+
+  background:
+    linear-gradient(
+      to top,
+      rgba(210, 210, 210, 0.90),
+      rgba(235, 235, 235, 0.55)
+    );
+
+  border-top:
+    1px solid rgba(0, 0, 0, 0.15);
 }
 
-/* 上下に暗さを付ける */
-.reel-window {
-  mask-image: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.3) 0%,
-    rgba(0, 0, 0, 1) 32%,
-    rgba(0, 0, 0, 1) 68%,
-    rgba(0, 0, 0, 0.3) 100%
-  );
 
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.3) 0%,
-    rgba(0, 0, 0, 1) 32%,
-    rgba(0, 0, 0, 1) 68%,
-    rgba(0, 0, 0, 0.3) 100%
-  );
-}
+/* =========================
+   リール
+========================= */
 
 .reel {
   position: absolute;
@@ -117,6 +129,11 @@ h1 {
 
   will-change: transform;
 }
+
+
+/* =========================
+   文字
+========================= */
 
 .symbol {
   height: 50px;
@@ -132,12 +149,16 @@ h1 {
 
   user-select: none;
 
-  transition:
-    transform 0.08s linear,
-    opacity 0.08s linear;
+  will-change:
+    transform,
+    opacity;
 }
 
-/* START / STOP */
+
+/* =========================
+   START / STOP
+========================= */
+
 #startStopButton {
   width: min(280px, 80vw);
 
@@ -164,10 +185,16 @@ h1 {
 }
 
 #startStopButton:disabled {
-  opacity: 0.6;
+  opacity: 0.65;
 }
 
+
+/* =========================
+   小さいスマホ
+========================= */
+
 @media (max-width: 360px) {
+
   .slot-machine {
     gap: 3px;
   }
@@ -175,4 +202,5 @@ h1 {
   .reel-window {
     border-width: 2px;
   }
+
 }
