@@ -1,0 +1,207 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: #f4f4f4;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+
+/* =========================
+   全体
+========================= */
+
+.game {
+  width: 100%;
+  max-width: 500px;
+
+  padding: 24px 16px;
+
+  text-align: center;
+}
+
+h1 {
+  margin: 0 0 32px;
+
+  font-size: clamp(28px, 8vw, 42px);
+  font-weight: 800;
+
+  letter-spacing: 0.05em;
+}
+
+
+/* =========================
+   スロット本体
+========================= */
+
+.slot-machine {
+  display: flex;
+
+  justify-content: center;
+  gap: 6px;
+
+  margin-bottom: 36px;
+}
+
+
+/* =========================
+   1リール分の窓
+========================= */
+
+.reel-window {
+  position: relative;
+
+  width: 18vw;
+  max-width: 82px;
+
+  height: 150px;
+
+  overflow: hidden;
+
+  background: white;
+
+  border: 3px solid #222;
+
+  border-radius: 8px;
+}
+
+
+/* 中央の選択位置 */
+
+.reel-window::before,
+.reel-window::after {
+  content: "";
+
+  position: absolute;
+  left: 0;
+
+  width: 100%;
+  height: 1px;
+
+  background: #999;
+
+  z-index: 10;
+
+  pointer-events: none;
+}
+
+.reel-window::before {
+  top: 50px;
+}
+
+.reel-window::after {
+  bottom: 50px;
+}
+
+
+/* =========================
+   リール
+========================= */
+
+.reel {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+
+  will-change: transform;
+}
+
+
+/* =========================
+   文字
+========================= */
+
+.symbol {
+  height: 50px;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  font-size: clamp(30px, 10vw, 48px);
+  font-weight: 700;
+
+  line-height: 1;
+
+  user-select: none;
+}
+
+
+/* =========================
+   上下を半分隠す
+========================= */
+
+.reel-window::before {
+  box-shadow:
+    0 -25px 30px 15px rgba(255, 255, 255, 0.85);
+}
+
+.reel-window::after {
+  box-shadow:
+    0 25px 30px 15px rgba(255, 255, 255, 0.85);
+}
+
+
+/* =========================
+   START / STOPボタン
+========================= */
+
+#startStopButton {
+  width: min(280px, 80vw);
+
+  padding: 18px;
+
+  border: none;
+  border-radius: 14px;
+
+  background: #222;
+  color: white;
+
+  font-size: 24px;
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+
+  cursor: pointer;
+
+  touch-action: manipulation;
+}
+
+#startStopButton:active {
+  transform: scale(0.97);
+}
+
+
+/* =========================
+   小さいスマホ
+========================= */
+
+@media (max-width: 360px) {
+
+  .slot-machine {
+    gap: 3px;
+  }
+
+  .reel-window {
+    border-width: 2px;
+  }
+
+}
