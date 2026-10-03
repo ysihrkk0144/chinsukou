@@ -8,7 +8,8 @@ const symbols = [
 
 const reels = document.querySelectorAll(".reel");
 
-const button = document.getElementById("startStopButton");
+const button =
+  document.getElementById("startStopButton");
 
 
 /* =========================
@@ -18,21 +19,29 @@ const button = document.getElementById("startStopButton");
 const symbolHeight = 50;
 
 /*
-  1文字進む時間。
+  回転速度
 
-  数値を小さくすると速く、
-  大きくすると遅くなる。
+  以前より速め。
+  さらに速くしたい場合は
+  320 → 360 などに変更。
 */
-const baseSpeed = 180;
+const baseSpeed = 320;
+
+/*
+  STOP後の減速時間
+  単位：ミリ秒
+*/
+const decelerationDuration = 650;
 
 
 /* =========================
-   リール状態
+   状態
 ========================= */
 
 const reelStates = [];
 
 let running = false;
+let stopping = false;
 
 
 /* =========================
@@ -41,18 +50,14 @@ let running = false;
 
 reels.forEach((reel, reelNumber) => {
 
-  /*
-    リールを途切れなく回すため、
-    同じ文字列を大量に並べる。
-  */
-
-  const repeatCount = 30;
+  const repeatCount = 40;
 
   for (let i = 0; i < repeatCount; i++) {
 
     symbols.forEach(symbol => {
 
-      const div = document.createElement("div");
+      const div =
+        document.createElement("div");
 
       div.className = "symbol";
       div.textContent = symbol;
@@ -63,10 +68,6 @@ reels.forEach((reel, reelNumber) => {
 
   }
 
-
-  /*
-    各リールの初期位置を少しずらす
-  */
 
   const initialIndex = reelNumber;
 
@@ -83,19 +84,19 @@ reels.forEach((reel, reelNumber) => {
 
     position: initialPosition,
 
-    /*
-      リールごとにほんの少しだけ
-      スピードを変える。
-
-      これによって5列が
-      常に同じ文字になるのを防ぐ。
-    */
-
     speed:
       baseSpeed +
-      reelNumber * 13,
+      reelNumber * 16,
 
-    lastTime: 0
+    currentSpeed:
+      baseSpeed +
+      reelNumber * 16,
+
+    lastTime: 0,
+
+    stopStartTime: 0,
+
+    stopStartSpeed: 0
 
   });
 
@@ -103,19 +104,19 @@ reels.forEach((reel, reelNumber) => {
 
 
 /* =========================
-   START / STOP
+   ボタン
 ========================= */
 
 button.addEventListener("click", () => {
 
+  if (stopping) {
+    return;
+  }
+
   if (running) {
-
-    stopReels();
-
+    beginStop();
   } else {
-
     startReels();
-
   }
 
 });
@@ -128,12 +129,18 @@ button.addEventListener("click", () => {
 function startReels() {
 
   running = true;
+  stopping = false;
 
   button.textContent = "STOP";
 
+  const now = performance.now();
+
   reelStates.forEach(state => {
 
-    state.lastTime = performance.now();
+    state.currentSpeed =
+      state.speed;
+
+    state.lastTime = now;
 
   });
 
@@ -143,22 +150,48 @@ function startReels() {
 
 
 /* =========================
-   STOP
+   STOP開始
 ========================= */
 
-function stopReels() {
+function beginStop() {
+
+  stopping = true;
+
+  button.disabled = true;
+
+  const now = performance.now();
+
+  reelStates.forEach(state => {
+
+    state.stopStartTime = now;
+
+    state.stopStartSpeed =
+      state.currentSpeed;
+
+  });
+
+}
+
+
+/* =========================
+   最終停止
+========================= */
+
+function finishStop() {
 
   running = false;
+  stopping = false;
 
+  button.disabled = false;
   button.textContent = "START";
 
 
-  /*
-    停止時に、一番近い文字位置へ
-    ピタッと揃える。
-  */
-
   reelStates.forEach(state => {
+
+    /*
+      最も近い文字位置へ
+      カチッと合わせる
+    */
 
     state.position =
       Math.round(
@@ -174,7 +207,7 @@ function stopReels() {
 
 
 /* =========================
-   リール回転
+   アニメーション
 ========================= */
 
 function animateReels(currentTime) {
@@ -182,6 +215,8 @@ function animateReels(currentTime) {
   if (!running) {
     return;
   }
+
+  let allStopped = true;
 
 
   reelStates.forEach(state => {
@@ -193,20 +228,66 @@ function animateReels(currentTime) {
 
 
     /*
-      下方向へ動かす
+      STOP中なら減速
+    */
+
+    if (stopping) {
+
+      const elapsed =
+        currentTime -
+        state.stopStartTime;
+
+      const progress =
+        Math.min(
+          elapsed /
+          decelerationDuration,
+          1
+        );
+
+
+      /*
+        easeOutCubic
+
+        最初はしっかり回り、
+        後半でゆっくりになる
+      */
+
+      const eased =
+        1 -
+        Math.pow(
+          1 - progress,
+          3
+        );
+
+
+      state.currentSpeed =
+        state.stopStartSpeed *
+        (1 - eased);
+
+
+      if (progress < 1) {
+        allStopped = false;
+      }
+
+    } else {
+
+      allStopped = false;
+
+    }
+
+
+    /*
+      上 → 下へ回転
     */
 
     state.position +=
-      state.speed *
+      state.currentSpeed *
       deltaTime /
       1000;
 
 
     /*
-      一定位置まで進んだら
-      元の位置へ戻す。
-
-      見た目上は途切れない。
+      ループ処理
     */
 
     const cycleHeight =
@@ -215,7 +296,8 @@ function animateReels(currentTime) {
 
     if (state.position >= 0) {
 
-      state.position -= cycleHeight;
+      state.position -=
+        cycleHeight;
 
     }
 
@@ -223,9 +305,99 @@ function animateReels(currentTime) {
     state.reel.style.transform =
       `translateY(${state.position}px)`;
 
+
+    /*
+      立体感
+    */
+
+    updateSymbolAppearance(state);
+
   });
 
 
+  if (stopping && allStopped) {
+
+    finishStop();
+
+    return;
+
+  }
+
+
   requestAnimationFrame(animateReels);
+
+}
+
+
+/* =========================
+   円筒っぽい見た目
+========================= */
+
+function updateSymbolAppearance(state) {
+
+  const symbolElements =
+    state.reel.children;
+
+  const reelTop =
+    state.position;
+
+
+  for (
+    let i = 0;
+    i < symbolElements.length;
+    i++
+  ) {
+
+    const symbol =
+      symbolElements[i];
+
+
+    /*
+      各文字の中心位置
+    */
+
+    const symbolCenter =
+      reelTop +
+      i * symbolHeight +
+      symbolHeight / 2;
+
+
+    /*
+      リール窓中央は75px
+    */
+
+    const distance =
+      Math.abs(
+        symbolCenter - 75
+      );
+
+
+    /*
+      中央ほど大きく、
+      上下ほど小さくする
+    */
+
+    const normalized =
+      Math.min(
+        distance / 75,
+        1
+      );
+
+
+    const scale =
+      1 - normalized * 0.22;
+
+
+    const opacity =
+      1 - normalized * 0.55;
+
+
+    symbol.style.transform =
+      `scale(${scale})`;
+
+    symbol.style.opacity =
+      opacity;
+
+  }
 
 }
